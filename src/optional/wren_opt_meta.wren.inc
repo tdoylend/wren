@@ -1,4 +1,4 @@
-// Generated automatically from src/optional/wren_opt_meta.wren. Do not edit.
+// Generated automatically from wren_opt_meta.wren. Do not edit.
 static const char* metaModuleSource =
 "class Meta {\n"
 "  static getModuleVariables(module) {\n"
@@ -29,6 +29,13 @@ static const char* metaModuleSource =
 "    return compile_(source, false, true)\n"
 "  }\n"
 "\n"
+"  static extend(target, source) {\n"
+"    if (!(source is Class)) Fiber.abort(\"Source must be a class.\")\n"
+"    if (!(target is Class)) Fiber.abort(\"Target must be a class.\")\n"
+"    return extend_(target, source)\n"
+"  }\n"
+"\n"
 "  foreign static compile_(source, isExpression, printErrors)\n"
 "  foreign static getModuleVariables_(module)\n"
+"  foreign static extend_(target, source)\n"
 "}\n";

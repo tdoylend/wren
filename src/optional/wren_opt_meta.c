@@ -65,6 +65,29 @@ void metaGetModuleVariables(WrenVM* vm)
   }
 }
 
+void metaExtend(WrenVM* vm)
+{
+  wrenEnsureSlots(vm, 3);
+  ObjClass* target = AS_CLASS(vm->apiStack[1]);
+  ObjClass* source = AS_CLASS(vm->apiStack[2]);
+
+  if (source->numFields) {
+    wrenSetSlotString(vm, 0, "Cannot extend from classes with fields.");
+    wrenAbortFiber(vm, 0);
+  } else {
+    if (target->methods.count < source->methods.count) {
+      Method nullMethod = {.type = METHOD_NONE};
+      wrenMethodBufferFill(vm, &target->methods, nullMethod,
+        source->methods.count - target->methods.count);
+    }
+    for (size_t i = 0; i < source->methods.count; i ++) {
+      if (source->methods.data[i].type != METHOD_NONE) {
+        target->methods.data[i] = source->methods.data[i];
+      }
+    }
+  }
+}
+
 const char* wrenMetaSource()
 {
   return metaModuleSource;
@@ -87,6 +110,11 @@ WrenForeignMethodFn wrenMetaBindForeignMethod(WrenVM* vm,
   if (strcmp(signature, "getModuleVariables_(_)") == 0)
   {
     return metaGetModuleVariables;
+  }
+
+  if (strcmp(signature, "extend_(_,_)") == 0)
+  {
+    return metaExtend;
   }
   
   ASSERT(false, "Unknown method.");
