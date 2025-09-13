@@ -67,9 +67,10 @@ void metaGetModuleVariables(WrenVM* vm)
 
 void metaExtend(WrenVM* vm)
 {
-  wrenEnsureSlots(vm, 3);
+  wrenEnsureSlots(vm, 4);
   ObjClass* target = AS_CLASS(vm->apiStack[1]);
   ObjClass* source = AS_CLASS(vm->apiStack[2]);
+  ObjString* signature = AS_STRING(vm->apiStack[3]);
 
   if (source->numFields) {
     wrenSetSlotString(vm, 0, "Cannot extend from classes with fields.");
@@ -80,12 +81,21 @@ void metaExtend(WrenVM* vm)
       wrenMethodBufferFill(vm, &target->methods, nullMethod,
         source->methods.count - target->methods.count);
     }
-    for (size_t i = 0; i < source->methods.count; i ++) {
-      if (source->methods.data[i].type != METHOD_NONE) {
-        target->methods.data[i] = source->methods.data[i];
-      }
+
+    int symbol = wrenSymbolTableFind(&vm->methodNames,
+      signature->value, signature->length);
+    if (
+      (symbol >= 0) &&
+      (symbol < source->methods.count) &&
+      (source->methods.data[symbol].type != METHOD_NONE)
+    ) {
+      target->methods.data[symbol] = source->methods.data[symbol];
+    } else {
+      wrenSetSlotString(vm, 0, "That signature is not defined on that class.");
+      wrenAbortFiber(vm, 0);
     }
   }
+  wrenSetSlotNull(vm, 0);
 }
 
 const char* wrenMetaSource()
@@ -112,7 +122,7 @@ WrenForeignMethodFn wrenMetaBindForeignMethod(WrenVM* vm,
     return metaGetModuleVariables;
   }
 
-  if (strcmp(signature, "extend_(_,_)") == 0)
+  if (strcmp(signature, "extend_(_,_,_)") == 0)
   {
     return metaExtend;
   }

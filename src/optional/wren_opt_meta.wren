@@ -27,13 +27,17 @@ class Meta {
     return compile_(source, false, true)
   }
 
-  static extend(target, source) {
+  static extend(target, source, signatures) {
     if (!(source is Class)) Fiber.abort("Source must be a class.")
     if (!(target is Class)) Fiber.abort("Target must be a class.")
-    return extend_(target, source)
+    
+    for (signature in signatures) {
+        if (!(signature is String)) Fiber.abort("Signature must be a string.")
+        extend_(target, source, signature)
+    }
   }
 
   foreign static compile_(source, isExpression, printErrors)
   foreign static getModuleVariables_(module)
-  foreign static extend_(target, source)
+  foreign static extend_(target, source, signature)
 }
