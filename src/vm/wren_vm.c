@@ -415,6 +415,7 @@ static void runtimeError(WrenVM* vm)
     // If the caller ran this fiber using "try", give it the error and stop.
     if (current->state == FIBER_TRY)
     {
+      wrenDebugPrintStackTrace(vm);
       // Make the caller's try method return the error message.
       current->caller->stackTop[-1] = vm->fiber->error;
       vm->fiber = current->caller;

@@ -111,7 +111,10 @@ typedef enum
   WREN_ERROR_RUNTIME,
 
   // One entry of a runtime error's stack trace.
-  WREN_ERROR_STACK_TRACE
+  WREN_ERROR_STACK_TRACE,
+
+  // Sentinel indicating that all messages associated with a particular error have been emitted.
+  WREN_ERROR_END_OF_FRAME
 } WrenErrorType;
 
 // Reports an error to the user.
