@@ -40,8 +40,8 @@ void wrenDebugPrintStackTrace(WrenVM* vm)
                        fn->module->name->value, line,
                        fn->debug->name);
 
-    vm->config.errorFn(vm, WREN_ERROR_END_OF_FRAME, NULL, 0, NULL);
   }
+  vm->config.errorFn(vm, WREN_ERROR_END_OF_FRAME, NULL, 0, NULL);
 }
 
 static void dumpObject(Obj* obj)
