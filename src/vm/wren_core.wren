@@ -47,8 +47,10 @@ class Sequence {
   }
 
   each(f) {
+    var i = 0
     for (element in this) {
-      f.call(element)
+      f.call(element, i)
+      i = i + 1
     }
   }
 

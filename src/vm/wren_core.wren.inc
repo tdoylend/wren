@@ -1,4 +1,4 @@
-// Generated automatically from src/vm/wren_core.wren. Do not edit.
+// Generated automatically from wren_core.wren. Do not edit.
 static const char* coreModuleSource =
 "class Bool {}\n"
 "class Fiber {}\n"
@@ -49,8 +49,10 @@ static const char* coreModuleSource =
 "  }\n"
 "\n"
 "  each(f) {\n"
+"    var i = 0\n"
 "    for (element in this) {\n"
-"      f.call(element)\n"
+"      f.call(element, i)\n"
+"      i = i + 1\n"
 "    }\n"
 "  }\n"
 "\n"
