@@ -848,6 +848,18 @@ DEF_PRIMITIVE(object_same)
   RETURN_BOOL(wrenValuesEqual(args[1], args[2]));
 }
 
+DEF_PRIMITIVE(object_address)
+{
+  if (IS_OBJ(args[1]))
+  {
+    RETURN_NUM((double)(ssize_t)(AS_OBJ(args[1])));
+  }
+  else
+  {
+    RETURN_ERROR("Parameter may not be a true, false, null, or a number.");
+  }
+}
+
 DEF_PRIMITIVE(object_not)
 {
   RETURN_VAL(FALSE_VAL);
@@ -1272,6 +1284,7 @@ void wrenInitializeCore(WrenVM* vm)
   wrenBindSuperclass(vm, objectMetaclass, vm->classClass);
 
   PRIMITIVE(objectMetaclass, "same(_,_)", object_same);
+  PRIMITIVE(objectMetaclass, "address(_)", object_address);
 
   // The core class diagram ends up looking like this, where single lines point
   // to a class's superclass, and double lines point to its metaclass:
