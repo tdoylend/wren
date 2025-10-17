@@ -729,25 +729,14 @@ Value wrenNewStringFromRange(WrenVM* vm, ObjString* source, int start,
                              uint32_t count, int step)
 {
   uint8_t* from = (uint8_t*)source->value;
-  int length = 0;
-  for (uint32_t i = 0; i < count; i++)
-  {
-    length += wrenUtf8DecodeNumBytes(from[start + i * step]);
-  }
-
-  ObjString* result = allocateString(vm, length);
-  result->value[length] = '\0';
+  ObjString* result = allocateString(vm, count);
+  result->value[count] = '\0';
 
   uint8_t* to = (uint8_t*)result->value;
   for (uint32_t i = 0; i < count; i++)
   {
     int index = start + i * step;
-    int codePoint = wrenUtf8Decode(from + index, source->length - index);
-
-    if (codePoint != -1)
-    {
-      to += wrenUtf8Encode(codePoint, to);
-    }
+    to[i] = from[index];
   }
 
   hashString(result);
