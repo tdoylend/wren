@@ -848,6 +848,36 @@ DEF_PRIMITIVE(object_same)
   RETURN_BOOL(wrenValuesEqual(args[1], args[2]));
 }
 
+DEF_PRIMITIVE(object_hasMethod)
+{
+  if (IS_STRING(args[2]))
+  {
+    ObjClass* objClass = wrenGetClass(vm, args[1]);
+    ObjString* signature = AS_STRING(args[2]);
+    int symbol = wrenSymbolTableFind(&vm->methodNames, signature->value, signature->length);
+    if (symbol < 0)
+    {
+      RETURN_BOOL(false);
+    }
+    else if (objClass->methods.count <= symbol)
+    {
+      RETURN_BOOL(false);
+    }
+    else if (objClass->methods.data[symbol].type == METHOD_NONE)
+    {
+      RETURN_BOOL(false);
+    }
+    else 
+    {
+      RETURN_BOOL(true);
+    }
+  }
+  else
+  {
+    RETURN_ERROR("Signature must be a String.");
+  }
+}
+
 DEF_PRIMITIVE(object_address)
 {
   if (IS_OBJ(args[1]))
@@ -1285,6 +1315,7 @@ void wrenInitializeCore(WrenVM* vm)
 
   PRIMITIVE(objectMetaclass, "same(_,_)", object_same);
   PRIMITIVE(objectMetaclass, "address(_)", object_address);
+  PRIMITIVE(objectMetaclass, "hasMethod(_,_)", object_hasMethod);
 
   // The core class diagram ends up looking like this, where single lines point
   // to a class's superclass, and double lines point to its metaclass:
