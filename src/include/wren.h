@@ -102,6 +102,10 @@ typedef WrenForeignMethodFn (*WrenBindForeignMethodFn)(WrenVM* vm,
 // Displays a string of text to the user.
 typedef void (*WrenWriteFn)(WrenVM* vm, const char* text);
 
+// Reads a line of text from the user. The returned buffer will be freed by
+// Wren and so should be allocated with Wren's allocation function.
+typedef const char* (*WrenReadFn)(WrenVM* vm);
+
 typedef enum
 {
   // A syntax or resolution error detected at compile time.
@@ -113,7 +117,8 @@ typedef enum
   // One entry of a runtime error's stack trace.
   WREN_ERROR_STACK_TRACE,
 
-  // Sentinel indicating that all messages associated with a particular error have been emitted.
+  // Sentinel indicating that all messages associated with a particular error
+  // have been emitted.
   WREN_ERROR_END_OF_FRAME
 } WrenErrorType;
 
@@ -227,6 +232,13 @@ typedef struct
   //
   // If this is `NULL`, Wren discards any printed text.
   WrenWriteFn writeFn;
+
+  // The callback Wren uses to display text when `System.print()` or the other
+  // related functions are called.
+  //
+  // If this is `NULL`, attempts to read from `System.input()` will always
+  // return an empty string.
+  WrenReadFn readFn;
 
   // The callback Wren uses to report errors.
   //

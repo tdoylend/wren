@@ -472,6 +472,11 @@ class System {
       writeString_("[invalid toString]")
     }
   }
+  
+  static input(prompt) {
+    write(prompt)
+    return input()
+  }
 }
 
 class ClassAttributes {
