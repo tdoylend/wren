@@ -1244,6 +1244,16 @@ DEF_PRIMITIVE(system_clock)
   RETURN_NUM((double)clock() / CLOCKS_PER_SEC);
 }
 
+DEF_PRIMITIVE(system_bytesAllocated)
+{
+  RETURN_NUM((double)(vm->bytesAllocated));
+}
+
+DEF_PRIMITIVE(system_nextGC)
+{
+  RETURN_NUM((double)(vm->nextGC));
+}
+
 DEF_PRIMITIVE(system_gc)
 {
   wrenCollectGarbage(vm);
@@ -1529,6 +1539,8 @@ void wrenInitializeCore(WrenVM* vm)
 
   ObjClass* systemClass = AS_CLASS(wrenFindVariable(vm, coreModule, "System"));
   PRIMITIVE(systemClass->obj.classObj, "clock", system_clock);
+  PRIMITIVE(systemClass->obj.classObj, "bytesAllocated", system_bytesAllocated);
+  PRIMITIVE(systemClass->obj.classObj, "nextGC", system_nextGC);
   PRIMITIVE(systemClass->obj.classObj, "gc()", system_gc);
   PRIMITIVE(systemClass->obj.classObj, "writeString_(_)", system_writeString);
   PRIMITIVE(systemClass->obj.classObj, "input()", system_input);
