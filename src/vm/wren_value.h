@@ -393,6 +393,7 @@ struct sObjClass
 {
   Obj obj;
   ObjClass* superclass;
+  ObjClass* metaClassOf;
 
   // The number of fields needed for an instance of this class, including all
   // of its superclass fields.

@@ -439,8 +439,13 @@ static void runtimeError(WrenVM* vm)
 // method with [symbol] on [classObj].
 static void methodNotFound(WrenVM* vm, ObjClass* classObj, int symbol)
 {
-  vm->fiber->error = wrenStringFormat(vm, "@ does not implement '$'.",
-      OBJ_VAL(classObj->name), vm->methodNames.data[symbol]->value);
+  if (classObj->metaClassOf) {
+    vm->fiber->error = wrenStringFormat(vm, "@ does not implement static method '$'.",
+        OBJ_VAL(classObj->metaClassOf->name), vm->methodNames.data[symbol]->value);
+  } else {
+    vm->fiber->error = wrenStringFormat(vm, "@ does not implement method '$'.",
+        OBJ_VAL(classObj->name), vm->methodNames.data[symbol]->value);
+  }
 }
 
 // Looks up the previously loaded module with [name].

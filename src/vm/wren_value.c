@@ -48,6 +48,7 @@ ObjClass* wrenNewSingleClass(WrenVM* vm, int numFields, ObjString* name)
   ObjClass* classObj = ALLOCATE(vm, ObjClass);
   initObj(vm, &classObj->obj, OBJ_CLASS, NULL);
   classObj->superclass = NULL;
+  classObj->metaClassOf = NULL;
   classObj->numFields = numFields;
   classObj->name = name;
   classObj->attributes = NULL_VAL;
@@ -109,6 +110,7 @@ ObjClass* wrenNewClass(WrenVM* vm, ObjClass* superclass, int numFields,
   wrenPushRoot(vm, (Obj*)classObj);
 
   classObj->obj.classObj = metaclass;
+  metaclass->metaClassOf = classObj;
   wrenBindSuperclass(vm, classObj, superclass);
 
   wrenPopRoot(vm);
@@ -1006,6 +1008,8 @@ static void blackenClass(WrenVM* vm, ObjClass* classObj)
 
   // The superclass.
   wrenGrayObj(vm, (Obj*)classObj->superclass);
+
+  wrenGrayObj(vm, (Obj*)classObj->metaClassOf);
 
   // Method function objects.
   for (int i = 0; i < classObj->methods.count; i++)
