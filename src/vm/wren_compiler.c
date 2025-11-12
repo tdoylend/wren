@@ -744,17 +744,17 @@ static int readHexDigit(Parser* parser)
 }
 
 // Parses the numeric value of the current token.
-static void makeNumber(Parser* parser, bool isHex)
+static void makeNumber(Parser* parser, bool isHex, char* digits)
 {
   errno = 0;
 
   if (isHex)
   {
-    parser->next.value = NUM_VAL((double)strtoll(parser->tokenStart, NULL, 16));
+    parser->next.value = NUM_VAL((double)strtoll(digits, NULL, 16));
   }
   else
   {
-    parser->next.value = NUM_VAL(strtod(parser->tokenStart, NULL));
+    parser->next.value = NUM_VAL(strtod(digits, NULL));
   }
   
   if (errno == ERANGE)
@@ -775,43 +775,83 @@ static void readHexNumber(Parser* parser)
   // Skip past the `x` used to denote a hexadecimal literal.
   nextChar(parser);
 
-  // Iterate over all the valid hexadecimal digits found.
-  while (readHexDigit(parser) != -1) continue;
+  char number[272];
+  int i = 0;
 
-  makeNumber(parser, true);
+  // Iterate over all the valid hexadecimal digits found.
+  bool scanning = true;
+  while (scanning) {
+    bool isHexDigit = false;
+    char c = peekChar(parser);
+    if ((c >= 'a') && (c <= 'f')) isHexDigit = true;
+    else if ((c >= 'A') && (c <= 'F')) isHexDigit = true;
+    else if ((c >= '0') && (c <= '9')) isHexDigit = true;
+    else if (c != '_') scanning = false;
+    if (isHexDigit) {
+      number[i++ % 272] = c;
+    }
+    if (scanning) nextChar(parser);
+  }
+
+  if (i >= 272) {
+    lexError(parser, "Number is too long (the limit is 271 characters).");
+  }
+  number[i % 272] = 0;
+
+  makeNumber(parser, true, number);
 }
 
 // Finishes lexing a number literal.
 static void readNumber(Parser* parser)
 {
-  while (isDigit(peekChar(parser))) nextChar(parser);
+  char number[272];
+  int  i = 1;
+  number[0] = *(parser->tokenStart);
+
+  while (isDigit(peekChar(parser)) || peekChar(parser) == '_')
+  {
+    if (peekChar(parser) != '_') number[i++ % 272] = peekChar(parser);
+    nextChar(parser);
+  }
 
   // See if it has a floating point. Make sure there is a digit after the "."
   // so we don't get confused by method calls on number literals.
   if (peekChar(parser) == '.' && isDigit(peekNextChar(parser)))
   {
-    nextChar(parser);
-    while (isDigit(peekChar(parser))) nextChar(parser);
+    number[i++ % 272] = nextChar(parser);
+    while (isDigit(peekChar(parser)) || peekChar(parser) == '_')
+    {
+      if (peekChar(parser) != '_') number[i++ % 272] = peekChar(parser);
+      nextChar(parser);
+    }
   }
 
   // See if the number is in scientific notation.
-  if (matchChar(parser, 'e') || matchChar(parser, 'E'))
+  if ((peekChar(parser) == 'e') || (peekChar(parser) == 'E'))
   {
-    // Allow a single positive/negative exponent symbol.
-    if(!matchChar(parser, '+'))
-    {
-      matchChar(parser, '-');
-    }
+    number[i++ % 272] = nextChar(parser);
+
+    if (peekChar(parser) == '+') number[i++ % 272] = nextChar(parser);
+    else if (peekChar(parser) == '-') number[i++ % 272] = nextChar(parser); 
 
     if (!isDigit(peekChar(parser)))
     {
       lexError(parser, "Unterminated scientific notation.");
     }
 
-    while (isDigit(peekChar(parser))) nextChar(parser);
+    while (isDigit(peekChar(parser)) || peekChar(parser) == '_')
+    {
+      if (peekChar(parser) != '_') number[i++ % 272] = peekChar(parser);
+      nextChar(parser);
+    }
   }
 
-  makeNumber(parser, false);
+  if (i >= 272) {
+    lexError(parser, "Number is too long (the limit is 271 characters).");
+  }
+  number[i % 272] = 0;
+
+  makeNumber(parser, false, number);
 }
 
 // Finishes lexing an identifier. Handles reserved words.
