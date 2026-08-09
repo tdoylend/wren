@@ -882,11 +882,11 @@ DEF_PRIMITIVE(object_address)
 {
   if (IS_OBJ(args[1]))
   {
-    RETURN_NUM((double)(ssize_t)(AS_OBJ(args[1])));
+    RETURN_NUM((double)(size_t)(AS_OBJ(args[1])));
   }
   else
   {
-    RETURN_ERROR("Parameter may not be a true, false, null, or a number.");
+    RETURN_ERROR("Parameter may not be true, false, null, or a number.");
   }
 }
 
